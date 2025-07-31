@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const twilio = require("twilio");
+const bcrypt = require("bcryptjs");
 const { sendOtpEmail, sendOtp } = require("../utils/sendOtp");
 
 require("dotenv").config();
@@ -23,7 +24,7 @@ exports.sendOtpToMobile = async (req, res) => {
 
   // Check existing user by email or phone
   const existingUser = await User.findOne({
-    $or: [{ email }, { phoneNumber }],
+    $or: [{ email }],
   });
   if (existingUser)
     return res
@@ -31,7 +32,7 @@ exports.sendOtpToMobile = async (req, res) => {
       .json({ message: "User already exists with this email or phone." });
 
   const otp = generateOtp();
-  const otpExpires = new Date(Date.now() + 5 * 60000); // 5 minutes
+  const otpExpires = new Date(Date.now() + 2 * 60000); // 5 minutes
 
   try {
     // await client.messages.create({
@@ -40,16 +41,17 @@ exports.sendOtpToMobile = async (req, res) => {
     //   to: "+18777804236",
     // });
     await client.messages.create({
-      body: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
+      body: `Your OTP code is ${otp}. It will expire in 2 minutes.`,
       from: process.env.TWILIO_PHONE_NUMBER,
       to: phoneNumber,
     });
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
       fullName,
       email,
       phoneNumber,
-      password,
+      password: hashedPassword,
       termsAccepted,
       location,
       otp,
@@ -79,14 +81,14 @@ exports.registerUser = async (req, res) => {
   const otpExpires = new Date(Date.now() + 5 * 60000); // 5 mins
 
   try {
-    // صرف ایک طریقہ استعمال کریں (Brevo یا Nodemailer)
     await sendOtp(email, otp);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
       fullName,
       email,
       phoneNumber,
-      password,
+      password: hashedPassword,
       termsAccepted,
       location,
       otp,
