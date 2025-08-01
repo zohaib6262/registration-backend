@@ -2,7 +2,6 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 const axios = require("axios");
 
-// Nodemailer setup (اگر آپ Gmail وغیرہ سے بھیجنا چاہیں)
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -19,8 +18,6 @@ const sendOtpEmail = async (email, otp) => {
     text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
   });
 };
-
-// Brevo API سے بھیجنے کے لیے
 const sendOtp = async (email, otp) => {
   const apiKey = process.env.BREVO_KEY;
   const url = "https://api.brevo.com/v3/smtp/email";

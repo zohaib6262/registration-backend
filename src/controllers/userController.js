@@ -76,12 +76,13 @@ exports.registerUser = async (req, res) => {
 
   const existing = await User.findOne({ email });
   if (existing) return res.status(409).json({ message: "Email exists." });
-
+  console.log("Registering user:", fullName);
   const otp = generateOtp();
+  console.log("Generated OTP:", otp);
   const otpExpires = new Date(Date.now() + 5 * 60000); // 5 mins
 
   try {
-    await sendOtp(email, otp);
+    await sendOtpEmail(email, otp);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
