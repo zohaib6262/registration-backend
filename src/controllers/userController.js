@@ -82,7 +82,7 @@ exports.registerUser = async (req, res) => {
   const otpExpires = new Date(Date.now() + 5 * 60000); // 5 mins
 
   try {
-    await sendOtpEmail(email, otp);
+    await sendOtp(email, otp);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
